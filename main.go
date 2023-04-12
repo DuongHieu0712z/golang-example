@@ -15,7 +15,7 @@ func main() {
 
 	db, err := db.ConnectDb()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	router := r.Group("/api/v1")
@@ -23,6 +23,6 @@ func main() {
 	routes.CreateTodoRoutes(router, db)
 
 	if err := r.Run(); err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 }

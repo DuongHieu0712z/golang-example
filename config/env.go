@@ -9,7 +9,7 @@ import (
 
 func GetMongoURI() string {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	return os.Getenv("MONGO_URI")
