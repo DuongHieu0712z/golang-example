@@ -9,8 +9,6 @@ import (
 	"example/models"
 	"example/repository"
 	"example/uow"
-
-	"github.com/PeteProgrammer/go-automapper"
 )
 
 type TodoUsecase interface {
@@ -56,7 +54,7 @@ func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, er
 
 func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error) {
 	var data models.Todo
-	automapper.MapLoose(form, &data)
+	// automapper.MapLoose(form, &data)
 
 	if err := uc.todoRepo.Create(ctx, &data); err != nil {
 		return nil, err
