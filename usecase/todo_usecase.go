@@ -2,19 +2,19 @@ package usecase
 
 import (
 	"context"
+	"example/common/pagination"
 	"example/db"
 	"example/dto"
 	"example/form"
 	"example/models"
 	"example/repository"
 	"example/uow"
-	"example/utils"
-	"fmt"
 
 	"github.com/PeteProgrammer/go-automapper"
 )
 
 type TodoUsecase interface {
+	GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error)
 	GetById(ctx context.Context, id string) (*dto.TodoDto, error)
 	Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error)
 	Update(ctx context.Context, id string, form form.TodoForm) error
@@ -34,14 +34,23 @@ func NewTodoUsecase(db *db.Database) TodoUsecase {
 	return usecase
 }
 
+func (uc *todoUsecase) GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error) {
+	data, err := uc.todoRepo.GetPagedList(ctx, param)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, error) {
-	data, err := uc.todoRepo.GetById(ctx, id)
+	_, err := uc.todoRepo.GetById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	var obj dto.TodoDto
-	automapper.MapLoose(data, &obj)
+	// automapper.MapLoose(data, &obj)
 	return &obj, nil
 }
 
@@ -54,7 +63,7 @@ func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.Tod
 	}
 
 	var obj dto.TodoDto
-	automapper.MapLoose(data, &obj)
+	// automapper.MapLoose(data, &obj)
 	return &obj, nil
 }
 
@@ -64,10 +73,7 @@ func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm
 		return err
 	}
 
-	fmt.Printf("%v\n", data)
-	utils.Map(form, data)
 	// automapper.MapLoose(form, &data)
-	fmt.Printf("%v\n", data)
 
 	if err := uc.todoRepo.Update(ctx, data); err != nil {
 		return err

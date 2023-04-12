@@ -12,6 +12,7 @@ func CreateTodoRoutes(router *gin.RouterGroup, db *db.Database) {
 
 	group := router.Group("/todos")
 	{
+		group.GET("/", ctrl.GetPagedList)
 		group.POST("/", ctrl.Create)
 		group.GET("/:id", ctrl.GetById)
 		group.PUT("/:id", ctrl.Update)

@@ -44,11 +44,11 @@ func WithLimit(limit int64) PagingParamOption {
 	}
 }
 
-func GetPagingParam(ctx *gin.Context) *PagingParam {
+func GetPagingParam(ctx *gin.Context) PagingParam {
 	page, _ := strconv.ParseInt(ctx.Query("page"), 10, 64)
 	limit, _ := strconv.ParseInt(ctx.Query("limit"), 10, 64)
 
-	return NewPagingParam(
+	return *NewPagingParam(
 		WithPage(page),
 		WithLimit(limit),
 	)

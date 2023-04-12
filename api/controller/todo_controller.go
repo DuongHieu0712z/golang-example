@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"example/common/pagination"
 	"example/common/response"
 	"example/db"
 	"example/form"
@@ -11,6 +12,7 @@ import (
 )
 
 type TodoController interface {
+	GetPagedList(ctx *gin.Context)
 	GetById(ctx *gin.Context)
 	Create(ctx *gin.Context)
 	Update(ctx *gin.Context)
@@ -25,6 +27,18 @@ func NewTodoController(db *db.Database) TodoController {
 	return &todoController{
 		usecase: usecase.NewTodoUsecase(db),
 	}
+}
+
+func (ctrl *todoController) GetPagedList(ctx *gin.Context) {
+	param := pagination.GetPagingParam(ctx)
+
+	data, err := ctrl.usecase.GetPagedList(ctx, param)
+	if err != nil {
+		response.Response(ctx, http.StatusBadRequest, nil, err)
+		return
+	}
+
+	response.Response(ctx, http.StatusOK, data, nil)
 }
 
 func (ctrl *todoController) GetById(ctx *gin.Context) {

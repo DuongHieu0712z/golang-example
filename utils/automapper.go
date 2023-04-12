@@ -68,7 +68,7 @@ func Map(src, dest interface{}) {
 			continue
 		}
 
-		value := valSrc.Field(i).Interface()
+		// value := valSrc.Field(i).Interface()
 		valDest.FieldByName(fieldName)
 	}
 }
