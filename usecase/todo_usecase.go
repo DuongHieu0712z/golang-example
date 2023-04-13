@@ -82,7 +82,7 @@ func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm
 		return err
 	}
 
-  // Override Todo form to current Todo object
+  // Override Todo form to above Todo object
 	automapper.MapLoose(form, data)
 
 	if err := uc.todoRepo.Update(ctx, data); err != nil {

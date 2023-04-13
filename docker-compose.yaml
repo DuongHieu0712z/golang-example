@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  api:
+    image: go-example
+    container_name: api
+    build: .
+    depends_on:
+      - 'mongo'
+    env_file:
+      - ./.env
+    volumes:
+      - .:/tmp/src/app:cached
+    restart: always
+    ports:
+      - 8080:8080
+  mongo:
+    image: mongo:lastest
+    container_name: mongo
+    volumes:
+      - .docker/data/db:/data/db
+    restart: always
+    ports:
+      - 27017:27017

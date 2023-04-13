@@ -2,6 +2,7 @@ package pagination
 
 import "math"
 
+// Pagination
 type PagedList struct {
 	Data       interface{} `json:"data"`
 	Page       int64       `json:"page"`
