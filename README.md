@@ -16,7 +16,7 @@
 - **`config`**: chứa các configuration của chương trình, lấy thông tin từ `.env`.
 - **`db`**: chứa kết nối đến CSDL.
 - **`model`**: chứa các model để lưu vào CSDL.
-- `repository`: chứa các đối tượng thực hiện tương tác trực tiếp với CSDL như thêm, sửa, xóa,... Tham khảo thêm về *`repository pattern`*.
+- **`repository`**: chứa các đối tượng thực hiện tương tác trực tiếp với CSDL như thêm, sửa, xóa,... Tham khảo thêm về *`repository pattern`*.
 - **`uow` (`unit of work`)**: chứa đối tượng dùng để quản lý các repository và transaction. Tham khảo thêm về *`unit of work pattern`*.
 - **`service`/`usecase`**: chứa các đối tượng thực hiện các business logic chính, kiểm tra nguồn dữ liệu trước khi đưa xuống `repository` và chuyển đổi dữ liệu trước khi trả về...
 - **`controller`/`handler`**: chứa các đối tượng thực hiện xử lý request và trả về response. Không nên thực hiện xử lý business logic ở đây mà nên đưa xuống `service`/`usecase`.
