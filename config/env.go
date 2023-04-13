@@ -14,3 +14,11 @@ func GetMongoURI() string {
 
 	return os.Getenv("MONGO_URI")
 }
+
+func GetDbName() string {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalln(err)
+	}
+
+	return os.Getenv("DB_NAME")
+}

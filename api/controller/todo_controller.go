@@ -12,11 +12,11 @@ import (
 )
 
 type TodoController interface {
-	GetPagedList(ctx *gin.Context)
-	GetById(ctx *gin.Context)
-	Create(ctx *gin.Context)
-	Update(ctx *gin.Context)
-	Delete(ctx *gin.Context)
+	GetPagedList() gin.HandlerFunc
+	GetById() gin.HandlerFunc
+	Create() gin.HandlerFunc
+	Update() gin.HandlerFunc
+	Delete() gin.HandlerFunc
 }
 
 type todoController struct {
@@ -29,69 +29,85 @@ func NewTodoController(db *db.Database) TodoController {
 	}
 }
 
-func (ctrl *todoController) GetPagedList(ctx *gin.Context) {
-	param := pagination.GetPagingParam(ctx)
+func (ctrl *todoController) GetPagedList() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// Get paging param from query
+		param := pagination.GetPagingParam(ctx)
 
-	data, err := ctrl.usecase.GetPagedList(ctx, param)
-	if err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
+		data, err := ctrl.usecase.GetPagedList(ctx, param)
+		if err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
+
+		response.Response(ctx, http.StatusOK, data, nil)
 	}
-
-	response.Response(ctx, http.StatusOK, data, nil)
 }
 
-func (ctrl *todoController) GetById(ctx *gin.Context) {
-	id := ctx.Param("id")
+func (ctrl *todoController) GetById() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// Get ID from param
+		id := ctx.Param("id")
 
-	data, err := ctrl.usecase.GetById(ctx, id)
-	if err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
+		data, err := ctrl.usecase.GetById(ctx, id)
+		if err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
+
+		response.Response(ctx, http.StatusOK, data, nil)
 	}
-
-	response.Response(ctx, http.StatusOK, data, nil)
 }
 
-func (ctrl *todoController) Create(ctx *gin.Context) {
-	var form form.TodoForm
-	if err := ctx.BindJSON(&form); err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
-	}
+func (ctrl *todoController) Create() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// Bind Todo form from body
+		var form form.TodoForm
+		if err := ctx.BindJSON(&form); err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
 
-	data, err := ctrl.usecase.Create(ctx, form)
-	if err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
-	}
+		data, err := ctrl.usecase.Create(ctx, form)
+		if err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
 
-	response.Response(ctx, http.StatusCreated, data, nil)
+		response.Response(ctx, http.StatusCreated, data, nil)
+	}
 }
 
-func (ctrl *todoController) Update(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var form form.TodoForm
-	if err := ctx.BindJSON(&form); err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
-	}
+func (ctrl *todoController) Update() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// Get ID from param
+		id := ctx.Param("id")
+		// Bind Todo form from body
+		var form form.TodoForm
+		if err := ctx.BindJSON(&form); err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
 
-	if err := ctrl.usecase.Update(ctx, id, form); err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
-	}
+		if err := ctrl.usecase.Update(ctx, id, form); err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
 
-	response.Response(ctx, http.StatusOK, "Success", nil)
+		response.Response(ctx, http.StatusOK, "Success", nil)
+	}
 }
 
-func (ctrl *todoController) Delete(ctx *gin.Context) {
-	id := ctx.Param("id")
+func (ctrl *todoController) Delete() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// Get ID from param
+		id := ctx.Param("id")
 
-	if err := ctrl.usecase.Delete(ctx, id); err != nil {
-		response.Response(ctx, http.StatusBadRequest, nil, err)
-		return
+		if err := ctrl.usecase.Delete(ctx, id); err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
+
+		response.Response(ctx, http.StatusOK, "Success", nil)
 	}
-
-	response.Response(ctx, http.StatusOK, "Success", nil)
 }

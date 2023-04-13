@@ -9,6 +9,8 @@ import (
 	"example/model"
 	"example/repository"
 	"example/uow"
+
+	"github.com/peteprogrammer/go-automapper"
 )
 
 type TodoUsecase interface {
@@ -38,40 +40,50 @@ func (uc *todoUsecase) GetPagedList(ctx context.Context, param pagination.Paging
 		return nil, err
 	}
 
+  // Convert Todo object to Todo dto
+	var dto []dto.TodoDto
+	automapper.MapLoose(data.Data, &dto)
+	data.Data = dto
+
 	return data, nil
 }
 
 func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, error) {
-	_, err := uc.todoRepo.GetById(ctx, id)
+	data, err := uc.todoRepo.GetById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
+  // Convert Todo object to Todo dto
 	var obj dto.TodoDto
-	// automapper.MapLoose(data, &obj)
+	automapper.MapLoose(data, &obj)
 	return &obj, nil
 }
 
 func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error) {
+  // Convert Todo form to Todo object
 	var data model.Todo
-	// automapper.MapLoose(form, &data)
+	automapper.MapLoose(form, &data)
 
 	if err := uc.todoRepo.Create(ctx, &data); err != nil {
 		return nil, err
 	}
 
+  // Convert Todo object to Todo dto
 	var obj dto.TodoDto
-	// automapper.MapLoose(data, &obj)
+	automapper.MapLoose(data, &obj)
 	return &obj, nil
 }
 
 func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm) error {
+  // Get Todo object by ID
 	data, err := uc.todoRepo.GetById(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	// automapper.MapLoose(form, &data)
+  // Override Todo form to current Todo object
+	automapper.MapLoose(form, data)
 
 	if err := uc.todoRepo.Update(ctx, data); err != nil {
 		return err

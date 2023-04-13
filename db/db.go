@@ -14,7 +14,8 @@ type Database struct {
 }
 
 func ConnectDb() (*Database, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(config.GetMongoURI()))
+	mongoUri := config.GetMongoURI()
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +27,8 @@ func ConnectDb() (*Database, error) {
 		return nil, err
 	}
 
-	return &Database{db: client.Database("test")}, nil
+	name := config.GetDbName()
+	return &Database{db: client.Database(name)}, nil
 }
 
 func (db *Database) GetCollection(name string) *mongo.Collection {

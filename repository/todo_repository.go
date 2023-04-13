@@ -36,11 +36,13 @@ func NewTodoRepository(db *db.Database) TodoRepository {
 }
 
 func (repo *todoRepository) GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error) {
+	// Get cursor, count of documents and error
 	cur, count, err := pagination.Pagination(repo.collection, ctx, param, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 
+	// Read data from cursor, and decode to Todo list
 	var data []model.Todo
 	if err := cur.All(ctx, &data); err != nil {
 		return nil, err
@@ -53,6 +55,7 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo
 	_id, _ := primitive.ObjectIDFromHex(id)
 	res := repo.collection.FindOne(ctx, bson.M{"_id": _id})
 
+	// Decode above result to Todo object
 	var data model.Todo
 	if err := res.Decode(&data); err != nil {
 		return nil, err
@@ -62,7 +65,9 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo
 }
 
 func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error {
+	// Generate ObjectID
 	data.Id = primitive.NewObjectID()
+	// Assign timestamps
 	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
 
 	_, err := repo.collection.InsertOne(ctx, data)
@@ -74,6 +79,7 @@ func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error 
 }
 
 func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) error {
+	// Assign timestamps
 	data.UpdatedAt = time.Now()
 
 	_, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
