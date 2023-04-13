@@ -4,7 +4,7 @@ import (
 	"context"
 	"example/common/pagination"
 	"example/db"
-	"example/models"
+	"example/model"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,9 +14,9 @@ import (
 
 type TodoRepository interface {
 	GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error)
-	GetById(ctx context.Context, id string) (*models.Todo, error)
-	Create(ctx context.Context, data *models.Todo) error
-	Update(ctx context.Context, data *models.Todo) error
+	GetById(ctx context.Context, id string) (*model.Todo, error)
+	Create(ctx context.Context, data *model.Todo) error
+	Update(ctx context.Context, data *model.Todo) error
 	Delete(ctx context.Context, id string) error
 }
 
@@ -41,7 +41,7 @@ func (repo *todoRepository) GetPagedList(ctx context.Context, param pagination.P
 		return nil, err
 	}
 
-	var data []models.Todo
+	var data []model.Todo
 	if err := cur.All(ctx, &data); err != nil {
 		return nil, err
 	}
@@ -49,11 +49,11 @@ func (repo *todoRepository) GetPagedList(ctx context.Context, param pagination.P
 	return pagination.NewPagedList(data, param.Page, param.Limit, count), nil
 }
 
-func (repo *todoRepository) GetById(ctx context.Context, id string) (*models.Todo, error) {
+func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	res := repo.collection.FindOne(ctx, bson.M{"_id": _id})
 
-	var data models.Todo
+	var data model.Todo
 	if err := res.Decode(&data); err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) (*models.Tod
 	return &data, nil
 }
 
-func (repo *todoRepository) Create(ctx context.Context, data *models.Todo) error {
+func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error {
 	data.Id = primitive.NewObjectID()
 	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
 
@@ -73,7 +73,7 @@ func (repo *todoRepository) Create(ctx context.Context, data *models.Todo) error
 	return nil
 }
 
-func (repo *todoRepository) Update(ctx context.Context, data *models.Todo) error {
+func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) error {
 	data.UpdatedAt = time.Now()
 
 	_, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})

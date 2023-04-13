@@ -6,7 +6,7 @@ import (
 	"example/db"
 	"example/dto"
 	"example/form"
-	"example/models"
+	"example/model"
 	"example/repository"
 	"example/uow"
 )
@@ -53,7 +53,7 @@ func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, er
 }
 
 func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error) {
-	var data models.Todo
+	var data model.Todo
 	// automapper.MapLoose(form, &data)
 
 	if err := uc.todoRepo.Create(ctx, &data); err != nil {
