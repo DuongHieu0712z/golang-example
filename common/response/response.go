@@ -8,6 +8,7 @@ func Response(ctx *gin.Context, statusCode int, data interface{}, err error) {
 		"error":  nil,
 		"status": statusCode,
 	}
+
 	if err != nil {
 		json["error"] = err.Error()
 	}

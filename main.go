@@ -2,6 +2,7 @@ package main
 
 import (
 	"example/api/routes"
+	"example/config"
 	"example/db"
 	"log"
 
@@ -11,18 +12,22 @@ import (
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 
-	r := gin.Default()
+	router := gin.Default()
+
+	// Create log file
+	file := config.CreateLog()
+	router.Use(gin.LoggerWithWriter(file))
 
 	db, err := db.ConnectDb()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	router := r.Group("/api/v1")
+	group := router.Group("/api/v1")
 
-	routes.CreateTodoRoutes(router, db)
+	routes.CreateTodoRoutes(group, db)
 
-	if err := r.Run(); err != nil {
+	if err := router.Run(); err != nil {
 		log.Fatalln(err)
 	}
 }

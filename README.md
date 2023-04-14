@@ -1,15 +1,17 @@
 # GOLANG EXAMPLE
 
-Đây là cấu trúc dự án tham khảo, không phải tiêu chuẩn, hãy áp dụng dựa theo tình huống của dự án.
+Đây là code mẫu Web API Golang sử dụng Gin Framework và MongoDB.
+
+*Lưu ý, cấu trúc dự án chỉ mang tính chất tham khảo.*
 
 - [GOLANG EXAMPLE](#golang-example)
-  - [1. LUỒNG ĐI CỦA DỮ LIỆU](#1-luồng-đi-của-dữ-liệu)
+  - [1. KIẾN TRÚC LOGIC](#1-kiến-trúc-logic)
   - [2. CẤU TRÚC DỰ ÁN](#2-cấu-trúc-dự-án)
   - [3. MỘT SỐ PACKAGE TIỆN ÍCH](#3-một-số-package-tiện-ích)
     - [3.1. Go validator](#31-go-validator)
     - [3.2. Automapper](#32-automapper)
 
-## 1. LUỒNG ĐI CỦA DỮ LIỆU
+## 1. KIẾN TRÚC LOGIC
 
 ![business-logic](/document/image/business-logic.png)
 
@@ -36,6 +38,7 @@
 **Sử dụng để tự động validate giá trị các trường trong struct.**
 
 Cài đặt:
+
 ```
 go get github.com/go-playground/validator/v10
 ```
@@ -45,6 +48,7 @@ go get github.com/go-playground/validator/v10
 **Sử dụng để tự động mapping giữa các model.**
 
 Cài đặt:
+
 ```
 go get github.com/peteprogrammer/go-automapper
 ```
