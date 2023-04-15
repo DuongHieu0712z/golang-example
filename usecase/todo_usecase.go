@@ -10,6 +10,7 @@ import (
 	"example/repository"
 	"example/uow"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/peteprogrammer/go-automapper"
 )
 
@@ -24,11 +25,13 @@ type TodoUsecase interface {
 type todoUsecase struct {
 	uow      uow.UnitOfWork
 	todoRepo repository.TodoRepository
+	validate *validator.Validate
 }
 
 func NewTodoUsecase(db *db.Database) TodoUsecase {
 	usecase := &todoUsecase{
-		uow: uow.NewUnitOfWork(db),
+		uow:      uow.NewUnitOfWork(db),
+		validate: validator.New(),
 	}
 	usecase.todoRepo = usecase.uow.Todos()
 	return usecase
@@ -40,7 +43,7 @@ func (uc *todoUsecase) GetPagedList(ctx context.Context, param pagination.Paging
 		return nil, err
 	}
 
-  // Convert Todo object to Todo dto
+	// Convert Todo object to Todo dto
 	var dto []dto.TodoDto
 	automapper.MapLoose(data.Data, &dto)
 	data.Data = dto
@@ -54,14 +57,19 @@ func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, er
 		return nil, err
 	}
 
-  // Convert Todo object to Todo dto
+	// Convert Todo object to Todo dto
 	var obj dto.TodoDto
 	automapper.MapLoose(data, &obj)
 	return &obj, nil
 }
 
 func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error) {
-  // Convert Todo form to Todo object
+	// Validate Todo form
+	if err := uc.validate.Struct(form); err != nil {
+		return nil, err
+	}
+
+	// Convert Todo form to Todo object
 	var data model.Todo
 	automapper.MapLoose(form, &data)
 
@@ -69,20 +77,25 @@ func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.Tod
 		return nil, err
 	}
 
-  // Convert Todo object to Todo dto
+	// Convert Todo object to Todo dto
 	var obj dto.TodoDto
 	automapper.MapLoose(data, &obj)
 	return &obj, nil
 }
 
 func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm) error {
-  // Get Todo object by ID
+	// Validate Todo form
+	if err := uc.validate.Struct(form); err != nil {
+		return err
+	}
+
+	// Get Todo object by ID
 	data, err := uc.todoRepo.GetById(ctx, id)
 	if err != nil {
 		return err
 	}
 
-  // Override Todo form to above Todo object
+	// Override Todo form into above Todo object
 	automapper.MapLoose(form, data)
 
 	if err := uc.todoRepo.Update(ctx, data); err != nil {

@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type TodoController interface {
@@ -21,14 +20,12 @@ type TodoController interface {
 }
 
 type todoController struct {
-	usecase  usecase.TodoUsecase
-	validate *validator.Validate
+	usecase usecase.TodoUsecase
 }
 
 func NewTodoController(db *db.Database) TodoController {
 	return &todoController{
-		usecase:  usecase.NewTodoUsecase(db),
-		validate: validator.New(),
+		usecase: usecase.NewTodoUsecase(db),
 	}
 }
 
@@ -71,12 +68,6 @@ func (ctrl *todoController) Create() gin.HandlerFunc {
 			return
 		}
 
-		// Validate Todo form
-		if err := ctrl.validate.Struct(form); err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
-
 		data, err := ctrl.usecase.Create(ctx, form)
 		if err != nil {
 			response.Response(ctx, http.StatusBadRequest, nil, err)
@@ -94,12 +85,6 @@ func (ctrl *todoController) Update() gin.HandlerFunc {
 		// Bind Todo form from body
 		var form form.TodoForm
 		if err := ctx.Bind(&form); err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
-
-		// Validate Todo form
-		if err := ctrl.validate.Struct(form); err != nil {
 			response.Response(ctx, http.StatusBadRequest, nil, err)
 			return
 		}
