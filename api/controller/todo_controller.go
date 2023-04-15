@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type TodoController interface {
@@ -20,12 +21,14 @@ type TodoController interface {
 }
 
 type todoController struct {
-	usecase usecase.TodoUsecase
+	usecase  usecase.TodoUsecase
+	validate *validator.Validate
 }
 
 func NewTodoController(db *db.Database) TodoController {
 	return &todoController{
-		usecase: usecase.NewTodoUsecase(db),
+		usecase:  usecase.NewTodoUsecase(db),
+		validate: validator.New(),
 	}
 }
 
@@ -63,7 +66,13 @@ func (ctrl *todoController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Bind Todo form from body
 		var form form.TodoForm
-		if err := ctx.BindJSON(&form); err != nil {
+		if err := ctx.Bind(&form); err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
+
+		// Validate Todo form
+		if err := ctrl.validate.Struct(form); err != nil {
 			response.Response(ctx, http.StatusBadRequest, nil, err)
 			return
 		}
@@ -84,7 +93,13 @@ func (ctrl *todoController) Update() gin.HandlerFunc {
 		id := ctx.Param("id")
 		// Bind Todo form from body
 		var form form.TodoForm
-		if err := ctx.BindJSON(&form); err != nil {
+		if err := ctx.Bind(&form); err != nil {
+			response.Response(ctx, http.StatusBadRequest, nil, err)
+			return
+		}
+
+		// Validate Todo form
+		if err := ctrl.validate.Struct(form); err != nil {
 			response.Response(ctx, http.StatusBadRequest, nil, err)
 			return
 		}
