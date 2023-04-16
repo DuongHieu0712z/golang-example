@@ -8,4 +8,3 @@ RUN go get -d -v
 RUN go build -v
 
 CMD [ "./example" ]
-

@@ -98,17 +98,9 @@ func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm
 	// Override Todo form into above Todo object
 	automapper.MapLoose(form, data)
 
-	if err := uc.todoRepo.Update(ctx, data); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.todoRepo.Update(ctx, data)
 }
 
 func (uc *todoUsecase) Delete(ctx context.Context, id string) error {
-	if err := uc.todoRepo.Delete(ctx, id); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.todoRepo.Delete(ctx, id)
 }

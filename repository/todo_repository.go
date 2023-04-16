@@ -71,11 +71,7 @@ func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error 
 	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
 
 	_, err := repo.collection.InsertOne(ctx, data)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) error {
@@ -83,20 +79,12 @@ func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) error 
 	data.UpdatedAt = time.Now()
 
 	_, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (repo *todoRepository) Delete(ctx context.Context, id string) error {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	_, err := repo.collection.DeleteOne(ctx, bson.M{"_id": _id})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
