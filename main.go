@@ -15,7 +15,7 @@ func main() {
 	router := gin.Default()
 
 	// Create log file
-	file := config.CreateLog()
+	file := config.CreateLogFile()
 	router.Use(gin.LoggerWithWriter(file))
 
 	db, err := db.ConnectDb()

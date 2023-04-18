@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func CreateLog() *os.File {
+func CreateLogFile() *os.File {
 	folder := "log"
 	os.Mkdir(folder, os.ModePerm)
 
