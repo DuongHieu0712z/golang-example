@@ -35,7 +35,10 @@ func NewTodoRepository(db *db.Database) TodoRepository {
 	return repo
 }
 
-func (repo *todoRepository) GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error) {
+func (repo *todoRepository) GetPagedList(
+	ctx context.Context,
+	param pagination.PagingParam,
+) (*pagination.PagedList, error) {
 	// Get cursor, count of documents and error
 	cur, count, err := pagination.Pagination(repo.collection, ctx, param, bson.M{})
 	if err != nil {

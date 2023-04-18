@@ -7,7 +7,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Pagination(coll *mongo.Collection, ctx context.Context, param PagingParam, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, int64, error) {
+func Pagination(
+	coll *mongo.Collection,
+	ctx context.Context,
+	param PagingParam,
+	filter interface{},
+	opts ...*options.FindOptions,
+) (*mongo.Cursor, int64, error) {
 	opt := options.Find()
 	opt.SetSkip((param.Page - 1) * param.Limit)
 	opt.SetLimit(param.Limit)

@@ -37,7 +37,10 @@ func NewTodoUsecase(db *db.Database) TodoUsecase {
 	return usecase
 }
 
-func (uc *todoUsecase) GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error) {
+func (uc *todoUsecase) GetPagedList(
+	ctx context.Context,
+	param pagination.PagingParam,
+) (*pagination.PagedList, error) {
 	data, err := uc.todoRepo.GetPagedList(ctx, param)
 	if err != nil {
 		return nil, err
