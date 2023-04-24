@@ -22,3 +22,11 @@ func GetDbName() string {
 
 	return os.Getenv("DB_NAME")
 }
+
+func GetHost() string {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalln(err)
+	}
+
+	return os.Getenv("HOST")
+}

@@ -3,6 +3,8 @@ package db
 import (
 	"context"
 	"example/config"
+	"example/model"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,9 +30,22 @@ func ConnectDb() (*Database, error) {
 	}
 
 	name := config.GetDbName()
-	return &Database{db: client.Database(name)}, nil
+	db := &Database{db: client.Database(name)}
+
+	// Create indexes is here
+	db.createIndexes(ctx, model.CreateTodoIndexes())
+
+	return db, nil
 }
 
 func (db *Database) GetCollection(name string) *mongo.Collection {
 	return db.db.Collection(name)
+}
+
+func (db *Database) createIndexes(ctx context.Context, models ...mongo.IndexModel) {
+	name, err := db.GetCollection("todo").Indexes().CreateMany(ctx, models)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("Created indexes: %v\n", name)
 }
