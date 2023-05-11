@@ -1,5 +1,6 @@
+**/vendor
 **/.docker
 **/tmp
 **/log
 **/*.exe
-
+.gitignore

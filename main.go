@@ -6,16 +6,10 @@ import (
 	"example/db"
 	"log"
 
-	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	_, err := casbin.NewEnforcer("./rbac/model.conf", "./rbac/policy.csv")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
@@ -33,11 +27,11 @@ func main() {
 
 	routes.CreateTodoRoutes(group, db)
 
-	host := config.GetHost()
+	port := config.GetPort()
 	log.Println("Connect database successfully...")
-	log.Printf("Start server at http://%s", host)
+	log.Printf("Start server at http://localhost:%s", port)
 
-	if err := router.Run(host); err != nil {
+	if err := router.Run(":" + port); err != nil {
 		log.Fatalln(err)
 	}
 }

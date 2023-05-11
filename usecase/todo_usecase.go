@@ -10,8 +10,8 @@ import (
 	"example/repository"
 	"example/uow"
 
+	"github.com/devfeel/mapper"
 	"github.com/go-playground/validator/v10"
-	"github.com/peteprogrammer/go-automapper"
 )
 
 type TodoUsecase interface {
@@ -46,10 +46,12 @@ func (uc *todoUsecase) GetPagedList(
 		return nil, err
 	}
 
-	// Convert Todo object to Todo dto
-	var dto []dto.TodoDto
-	automapper.MapLoose(data.Data, &dto)
-	data.Data = dto
+	// Convert Todo object to Todo obj
+	var obj []dto.TodoDto
+	if err := mapper.MapperSlice(data.Data, &obj); err != nil {
+		return nil, err
+	}
+	data.Data = obj
 
 	return data, nil
 }
@@ -61,9 +63,11 @@ func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, er
 	}
 
 	// Convert Todo object to Todo dto
-	var obj dto.TodoDto
-	automapper.MapLoose(data, &obj)
-	return &obj, nil
+	obj := &dto.TodoDto{}
+	if err := mapper.Mapper(data, obj); err != nil {
+		return nil, err
+	}
+	return obj, nil
 }
 
 func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error) {
@@ -73,17 +77,21 @@ func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.Tod
 	}
 
 	// Convert Todo form to Todo object
-	var data model.Todo
-	automapper.MapLoose(form, &data)
+	data := &model.Todo{}
+	if err := mapper.Mapper(&form, data); err != nil {
+		return nil, err
+	}
 
-	if err := uc.todoRepo.Create(ctx, &data); err != nil {
+	if err := uc.todoRepo.Create(ctx, data); err != nil {
 		return nil, err
 	}
 
 	// Convert Todo object to Todo dto
-	var obj dto.TodoDto
-	automapper.MapLoose(data, &obj)
-	return &obj, nil
+	obj := &dto.TodoDto{}
+	if err := mapper.AutoMapper(data, obj); err != nil {
+		return nil, err
+	}
+	return obj, nil
 }
 
 func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm) error {
@@ -99,7 +107,9 @@ func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm
 	}
 
 	// Override Todo form into above Todo object
-	automapper.MapLoose(form, data)
+	if err := mapper.Mapper(&form, data); err != nil {
+		return err
+	}
 
 	return uc.todoRepo.Update(ctx, data)
 }

@@ -9,7 +9,7 @@
   - [2. CẤU TRÚC DỰ ÁN](#2-cấu-trúc-dự-án)
   - [3. MỘT SỐ PACKAGE TIỆN ÍCH](#3-một-số-package-tiện-ích)
     - [3.1. Go validator](#31-go-validator)
-    - [3.2. Automapper](#32-automapper)
+    - [3.2. devfeel/mapper](#32-devfeelmapper)
 
 ## 1. KIẾN TRÚC LOGIC
 
@@ -43,12 +43,12 @@ Cài đặt:
 go get github.com/go-playground/validator/v10
 ```
 
-### 3.2. [Automapper](https://pkg.go.dev/github.com/peteprogrammer/go-automapper)
+### 3.2. [devfeel/mapper](https://pkg.go.dev/github.com/devfeel/mapper)
 
 **Sử dụng để tự động mapping giữa các model.**
 
 Cài đặt:
 
 ```
-go get github.com/peteprogrammer/go-automapper
+go get github.com/devfeel/mapper
 ```

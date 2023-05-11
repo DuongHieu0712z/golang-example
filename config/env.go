@@ -7,26 +7,27 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func GetMongoURI() string {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalln(err)
-	}
+const (
+	MONGO_URI = "MONGO_URI"
+	DB_NAME   = "DB_NAME"
+	PORT      = "PORT"
+)
 
-	return os.Getenv("MONGO_URI")
+func getEnv(key string) string {
+	if err := godotenv.Load(); err != nil {
+		log.Println(err)
+	}
+	return os.Getenv(key)
+}
+
+func GetMongoURI() string {
+	return getEnv(MONGO_URI)
 }
 
 func GetDbName() string {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalln(err)
-	}
-
-	return os.Getenv("DB_NAME")
+	return getEnv(DB_NAME)
 }
 
-func GetHost() string {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalln(err)
-	}
-
-	return os.Getenv("HOST")
+func GetPort() string {
+	return getEnv(PORT)
 }
