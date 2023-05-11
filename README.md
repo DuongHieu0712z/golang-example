@@ -45,7 +45,7 @@ go get github.com/go-playground/validator/v10
 
 ### 3.2. [devfeel/mapper](https://pkg.go.dev/github.com/devfeel/mapper)
 
-**Sử dụng để tự động mapping giữa các model.**
+**Sử dụng để tự động mapping giữa các đối tượng.**
 
 Cài đặt:
 
