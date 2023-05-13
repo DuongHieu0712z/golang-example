@@ -31,10 +31,10 @@ func NewTodoController(db *db.Database) TodoController {
 
 func (ctrl *todoController) GetPagedList() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Get paging param from query
-		param := pagination.GetPagingParam(ctx)
+		// Get paging params from query
+		params := pagination.GetPagingParams(ctx)
 
-		data, err := ctrl.usecase.GetPagedList(ctx, param)
+		data, err := ctrl.usecase.GetPagedList(ctx, params)
 		if err != nil {
 			response.Response(ctx, http.StatusBadRequest, nil, err)
 			return

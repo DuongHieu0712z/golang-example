@@ -15,7 +15,7 @@ import (
 )
 
 type TodoUsecase interface {
-	GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error)
+	GetPagedList(ctx context.Context, params pagination.PagingParams) (*pagination.PagedList, error)
 	GetById(ctx context.Context, id string) (*dto.TodoDto, error)
 	Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error)
 	Update(ctx context.Context, id string, form form.TodoForm) error
@@ -39,9 +39,9 @@ func NewTodoUsecase(db *db.Database) TodoUsecase {
 
 func (uc *todoUsecase) GetPagedList(
 	ctx context.Context,
-	param pagination.PagingParam,
+	params pagination.PagingParams,
 ) (*pagination.PagedList, error) {
-	data, err := uc.todoRepo.GetPagedList(ctx, param)
+	data, err := uc.todoRepo.GetPagedList(ctx, params)
 	if err != nil {
 		return nil, err
 	}

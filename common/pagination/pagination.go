@@ -3,6 +3,7 @@ package pagination
 import (
 	"context"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -10,13 +11,14 @@ import (
 func Pagination(
 	coll *mongo.Collection,
 	ctx context.Context,
-	param PagingParam,
+	params PagingParams,
 	filter interface{},
 	opts ...*options.FindOptions,
 ) (*mongo.Cursor, int64, error) {
 	opt := options.Find()
-	opt.SetSkip((param.Page - 1) * param.Limit)
-	opt.SetLimit(param.Limit)
+	opt.SetSkip((params.Page - 1) * params.Limit)
+	opt.SetLimit(params.Limit)
+	opt.SetSort(bson.D{{Key: params.Field, Value: params.Order}})
 
 	opts = append(opts, opt)
 

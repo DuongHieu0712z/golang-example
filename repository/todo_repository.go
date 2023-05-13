@@ -13,7 +13,7 @@ import (
 )
 
 type TodoRepository interface {
-	GetPagedList(ctx context.Context, param pagination.PagingParam) (*pagination.PagedList, error)
+	GetPagedList(ctx context.Context, params pagination.PagingParams) (*pagination.PagedList, error)
 	GetById(ctx context.Context, id string) (*model.Todo, error)
 	Create(ctx context.Context, data *model.Todo) error
 	Update(ctx context.Context, data *model.Todo) error
@@ -37,10 +37,10 @@ func NewTodoRepository(db *db.Database) TodoRepository {
 
 func (repo *todoRepository) GetPagedList(
 	ctx context.Context,
-	param pagination.PagingParam,
+	params pagination.PagingParams,
 ) (*pagination.PagedList, error) {
 	// Get cursor, count of documents and error
-	cur, count, err := pagination.Pagination(repo.collection, ctx, param, bson.M{})
+	cur, count, err := pagination.Pagination(repo.collection, ctx, params, bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (repo *todoRepository) GetPagedList(
 		return nil, err
 	}
 
-	return pagination.NewPagedList(data, param.Page, param.Limit, count), nil
+	return pagination.NewPagedList(data, params.Page, params.Limit, count), nil
 }
 
 func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo, error) {
@@ -59,12 +59,12 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo
 	res := repo.collection.FindOne(ctx, bson.M{"_id": _id})
 
 	// Decode above result to Todo object
-	var data model.Todo
-	if err := res.Decode(&data); err != nil {
+	data := &model.Todo{}
+	if err := res.Decode(data); err != nil {
 		return nil, err
 	}
 
-	return &data, nil
+	return data, nil
 }
 
 func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error {
