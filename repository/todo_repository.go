@@ -68,13 +68,16 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo
 }
 
 func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error {
-	// Generate ObjectID
-	data.Id = primitive.NewObjectID()
 	// Assign timestamps
 	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
 
-	_, err := repo.collection.InsertOne(ctx, data)
-	return err
+	result, err := repo.collection.InsertOne(ctx, data)
+	if err != nil {
+		return err
+	}
+
+	data.Id = result.InsertedID.(primitive.ObjectID)
+	return nil
 }
 
 func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) error {

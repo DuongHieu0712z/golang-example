@@ -7,7 +7,7 @@ import (
 )
 
 type Todo struct {
-	Id        primitive.ObjectID `bson:"_id"`
+	Id        primitive.ObjectID `bson:"_id,omitempty"`
 	Name      string             `bson:"name"`
 	CreatedAt time.Time          `bson:"createdAt"`
 	UpdatedAt time.Time          `bson:"updatedAt"`
