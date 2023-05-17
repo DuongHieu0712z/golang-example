@@ -41,7 +41,10 @@ func (repo *todoRepository) GetPagedList(
 	params pagination.PagingParams,
 ) *pagination.PagedList {
 	// Get cursor, count of documents and
-	cur, count := pagination.Pagination(repo.collection, ctx, params, bson.M{})
+	cur, count, err := pagination.Pagination(repo.collection, ctx, params, bson.M{})
+	if err != nil {
+		panic(errs.BadRequestError(err))
+	}
 
 	// Read data from cursor, and decode to Todo list
 	var data []model.Todo
