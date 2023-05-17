@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"example/common/errs"
 	"example/common/pagination"
 	"example/common/response"
 	"example/db"
@@ -34,11 +35,7 @@ func (ctrl *todoController) GetPagedList() gin.HandlerFunc {
 		// Get paging params from query
 		params := pagination.GetPagingParams(ctx)
 
-		data, err := ctrl.usecase.GetPagedList(ctx, params)
-		if err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
+		data := ctrl.usecase.GetPagedList(ctx, params)
 
 		response.Response(ctx, http.StatusOK, data, nil)
 	}
@@ -49,11 +46,7 @@ func (ctrl *todoController) GetById() gin.HandlerFunc {
 		// Get ID from param
 		id := ctx.Param("id")
 
-		data, err := ctrl.usecase.GetById(ctx, id)
-		if err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
+		data := ctrl.usecase.GetById(ctx, id)
 
 		response.Response(ctx, http.StatusOK, data, nil)
 	}
@@ -64,15 +57,10 @@ func (ctrl *todoController) Create() gin.HandlerFunc {
 		// Bind Todo form from body
 		var form form.TodoForm
 		if err := ctx.Bind(&form); err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
+			panic(errs.BadRequestError(err))
 		}
 
-		data, err := ctrl.usecase.Create(ctx, form)
-		if err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
+		data := ctrl.usecase.Create(ctx, form)
 
 		response.Response(ctx, http.StatusCreated, data, nil)
 	}
@@ -85,14 +73,10 @@ func (ctrl *todoController) Update() gin.HandlerFunc {
 		// Bind Todo form from body
 		var form form.TodoForm
 		if err := ctx.Bind(&form); err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
+			panic(errs.BadRequestError(err))
 		}
 
-		if err := ctrl.usecase.Update(ctx, id, form); err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
+		ctrl.usecase.Update(ctx, id, form)
 
 		response.Response(ctx, http.StatusOK, "Success", nil)
 	}
@@ -103,10 +87,7 @@ func (ctrl *todoController) Delete() gin.HandlerFunc {
 		// Get ID from param
 		id := ctx.Param("id")
 
-		if err := ctrl.usecase.Delete(ctx, id); err != nil {
-			response.Response(ctx, http.StatusBadRequest, nil, err)
-			return
-		}
+		ctrl.usecase.Delete(ctx, id)
 
 		response.Response(ctx, http.StatusOK, "Success", nil)
 	}

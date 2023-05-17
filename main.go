@@ -1,6 +1,7 @@
 package main
 
 import (
+	"example/api/middleware"
 	"example/api/routes"
 	"example/config"
 	"example/db"
@@ -17,6 +18,8 @@ func main() {
 	// Create log file
 	file := config.CreateLogFile()
 	router.Use(gin.LoggerWithWriter(file))
+	router.Use(middleware.JsonHeader())
+	router.Use(middleware.ErrorHandler())
 
 	db, err := db.ConnectDb()
 	if err != nil {

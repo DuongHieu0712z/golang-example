@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"example/common/errs"
 	"example/common/pagination"
 	"example/db"
 	"example/model"
@@ -13,11 +14,11 @@ import (
 )
 
 type TodoRepository interface {
-	GetPagedList(ctx context.Context, params pagination.PagingParams) (*pagination.PagedList, error)
-	GetById(ctx context.Context, id string) (*model.Todo, error)
-	Create(ctx context.Context, data *model.Todo) error
-	Update(ctx context.Context, data *model.Todo) error
-	Delete(ctx context.Context, id string) error
+	GetPagedList(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
+	GetById(ctx context.Context, id string) *model.Todo
+	Create(ctx context.Context, data *model.Todo)
+	Update(ctx context.Context, data *model.Todo)
+	Delete(ctx context.Context, id string)
 }
 
 type todoRepository struct {
@@ -38,59 +39,59 @@ func NewTodoRepository(db *db.Database) TodoRepository {
 func (repo *todoRepository) GetPagedList(
 	ctx context.Context,
 	params pagination.PagingParams,
-) (*pagination.PagedList, error) {
-	// Get cursor, count of documents and error
-	cur, count, err := pagination.Pagination(repo.collection, ctx, params, bson.M{})
-	if err != nil {
-		return nil, err
-	}
+) *pagination.PagedList {
+	// Get cursor, count of documents and
+	cur, count := pagination.Pagination(repo.collection, ctx, params, bson.M{})
 
 	// Read data from cursor, and decode to Todo list
 	var data []model.Todo
 	if err := cur.All(ctx, &data); err != nil {
-		return nil, err
+		panic(errs.BadRequestError(err))
 	}
 
-	return pagination.NewPagedList(data, params.Page, params.Limit, count), nil
+	return pagination.NewPagedList(data, params.Page, params.Limit, count)
 }
 
-func (repo *todoRepository) GetById(ctx context.Context, id string) (*model.Todo, error) {
+func (repo *todoRepository) GetById(ctx context.Context, id string) *model.Todo {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	res := repo.collection.FindOne(ctx, bson.M{"_id": _id})
 
 	// Decode above result to Todo object
 	data := &model.Todo{}
 	if err := res.Decode(data); err != nil {
-		return nil, err
+		panic(errs.BadRequestError(err))
 	}
 
-	return data, nil
+	return data
 }
 
-func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) error {
+func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) {
 	// Assign timestamps
 	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
 
 	result, err := repo.collection.InsertOne(ctx, data)
 	if err != nil {
-		return err
+		panic(errs.BadRequestError(err))
 	}
 
 	data.Id = result.InsertedID.(primitive.ObjectID)
-	return nil
 }
 
-func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) error {
+func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) {
 	// Assign timestamps
 	data.UpdatedAt = time.Now()
 
 	_, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
-	return err
+	if err != nil {
+		panic(errs.BadRequestError(err))
+	}
 }
 
-func (repo *todoRepository) Delete(ctx context.Context, id string) error {
+func (repo *todoRepository) Delete(ctx context.Context, id string) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	_, err := repo.collection.DeleteOne(ctx, bson.M{"_id": _id})
-	return err
+	if err != nil {
+		panic(errs.BadRequestError(err))
+	}
 }

@@ -8,7 +8,7 @@ import (
 
 func CreateLogFile() *os.File {
 	folder := "log"
-	os.Mkdir(folder, os.ModePerm)
+	_ = os.Mkdir(folder, os.ModePerm)
 
 	fileName := time.Now().Format("2006-01-02") + ".log"
 	path := filepath.Join(folder, fileName)

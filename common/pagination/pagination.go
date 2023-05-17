@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"context"
+	"example/common/errs"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,7 +15,7 @@ func Pagination(
 	params PagingParams,
 	filter interface{},
 	opts ...*options.FindOptions,
-) (*mongo.Cursor, int64, error) {
+) (*mongo.Cursor, int64) {
 	opt := options.Find()
 	opt.SetSkip((params.Page - 1) * params.Limit)
 	opt.SetLimit(params.Limit)
@@ -24,13 +25,13 @@ func Pagination(
 
 	cur, err := coll.Find(ctx, filter, opts...)
 	if err != nil {
-		return nil, 0, err
+		panic(errs.BadRequestError(err))
 	}
 
 	count, err := coll.CountDocuments(ctx, filter)
 	if err != nil {
-		return nil, 0, err
+		panic(errs.BadRequestError(err))
 	}
 
-	return cur, count, nil
+	return cur, count
 }

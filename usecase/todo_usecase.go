@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"example/common/errs"
 	"example/common/pagination"
 	"example/db"
 	"example/dto"
@@ -11,27 +12,24 @@ import (
 	"example/uow"
 
 	"github.com/devfeel/mapper"
-	"github.com/go-playground/validator/v10"
 )
 
 type TodoUsecase interface {
-	GetPagedList(ctx context.Context, params pagination.PagingParams) (*pagination.PagedList, error)
-	GetById(ctx context.Context, id string) (*dto.TodoDto, error)
-	Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error)
-	Update(ctx context.Context, id string, form form.TodoForm) error
-	Delete(ctx context.Context, id string) error
+	GetPagedList(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
+	GetById(ctx context.Context, id string) *dto.TodoDto
+	Create(ctx context.Context, form form.TodoForm) *dto.TodoDto
+	Update(ctx context.Context, id string, form form.TodoForm)
+	Delete(ctx context.Context, id string)
 }
 
 type todoUsecase struct {
 	uow      uow.UnitOfWork
 	todoRepo repository.TodoRepository
-	validate *validator.Validate
 }
 
 func NewTodoUsecase(db *db.Database) TodoUsecase {
 	usecase := &todoUsecase{
-		uow:      uow.NewUnitOfWork(db),
-		validate: validator.New(),
+		uow: uow.NewUnitOfWork(db),
 	}
 	usecase.todoRepo = usecase.uow.Todos()
 	return usecase
@@ -40,80 +38,59 @@ func NewTodoUsecase(db *db.Database) TodoUsecase {
 func (uc *todoUsecase) GetPagedList(
 	ctx context.Context,
 	params pagination.PagingParams,
-) (*pagination.PagedList, error) {
-	data, err := uc.todoRepo.GetPagedList(ctx, params)
-	if err != nil {
-		return nil, err
-	}
+) *pagination.PagedList {
+	data := uc.todoRepo.GetPagedList(ctx, params)
 
 	// Convert Todo object to Todo obj
 	var obj []dto.TodoDto
 	if err := mapper.MapperSlice(data.Data, &obj); err != nil {
-		return nil, err
+		panic(errs.BadRequestError(err))
 	}
 	data.Data = obj
 
-	return data, nil
+	return data
 }
 
-func (uc *todoUsecase) GetById(ctx context.Context, id string) (*dto.TodoDto, error) {
-	data, err := uc.todoRepo.GetById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
+func (uc *todoUsecase) GetById(ctx context.Context, id string) *dto.TodoDto {
+	data := uc.todoRepo.GetById(ctx, id)
 
 	// Convert Todo object to Todo dto
 	obj := &dto.TodoDto{}
 	if err := mapper.Mapper(data, obj); err != nil {
-		return nil, err
+		panic(errs.BadRequestError(err))
 	}
-	return obj, nil
+	return obj
 }
 
-func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) (*dto.TodoDto, error) {
-	// Validate Todo form
-	if err := uc.validate.Struct(form); err != nil {
-		return nil, err
-	}
-
+func (uc *todoUsecase) Create(ctx context.Context, form form.TodoForm) *dto.TodoDto {
 	// Convert Todo form to Todo object
 	data := &model.Todo{}
 	if err := mapper.Mapper(&form, data); err != nil {
-		return nil, err
+		panic(errs.BadRequestError(err))
 	}
 
-	if err := uc.todoRepo.Create(ctx, data); err != nil {
-		return nil, err
-	}
+	uc.todoRepo.Create(ctx, data)
 
 	// Convert Todo object to Todo dto
 	obj := &dto.TodoDto{}
 	if err := mapper.AutoMapper(data, obj); err != nil {
-		return nil, err
+		panic(errs.BadRequestError(err))
 	}
-	return obj, nil
+	return obj
 }
 
-func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm) error {
-	// Validate Todo form
-	if err := uc.validate.Struct(form); err != nil {
-		return err
-	}
-
+func (uc *todoUsecase) Update(ctx context.Context, id string, form form.TodoForm) {
 	// Get Todo object by ID
-	data, err := uc.todoRepo.GetById(ctx, id)
-	if err != nil {
-		return err
-	}
+	data := uc.todoRepo.GetById(ctx, id)
 
 	// Override Todo form into above Todo object
 	if err := mapper.Mapper(&form, data); err != nil {
-		return err
+		panic(errs.BadRequestError(err))
 	}
 
-	return uc.todoRepo.Update(ctx, data)
+	uc.todoRepo.Update(ctx, data)
 }
 
-func (uc *todoUsecase) Delete(ctx context.Context, id string) error {
-	return uc.todoRepo.Delete(ctx, id)
+func (uc *todoUsecase) Delete(ctx context.Context, id string) {
+	uc.todoRepo.Delete(ctx, id)
 }
