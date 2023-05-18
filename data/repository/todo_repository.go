@@ -4,8 +4,8 @@ import (
 	"context"
 	"example/common/errs"
 	"example/common/pagination"
+	"example/data/entity"
 	"example/db"
-	"example/model"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,9 +15,9 @@ import (
 
 type TodoRepository interface {
 	GetPagedList(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
-	GetById(ctx context.Context, id string) *model.Todo
-	Create(ctx context.Context, data *model.Todo)
-	Update(ctx context.Context, data *model.Todo)
+	GetById(ctx context.Context, id string) *entity.Todo
+	Create(ctx context.Context, data *entity.Todo)
+	Update(ctx context.Context, data *entity.Todo)
 	Delete(ctx context.Context, id string)
 }
 
@@ -40,14 +40,12 @@ func (repo *todoRepository) GetPagedList(
 	ctx context.Context,
 	params pagination.PagingParams,
 ) *pagination.PagedList {
-	// Get cursor, count of documents and
-	cur, count, err := pagination.Pagination(repo.collection, ctx, params, bson.M{})
+	cur, count, err := pagination.Pagination(ctx, repo.collection, params, bson.M{})
 	if err != nil {
 		panic(errs.BadRequestError(err))
 	}
 
-	// Read data from cursor, and decode to Todo list
-	var data []model.Todo
+	var data []entity.Todo
 	if err := cur.All(ctx, &data); err != nil {
 		panic(errs.BadRequestError(err))
 	}
@@ -55,12 +53,11 @@ func (repo *todoRepository) GetPagedList(
 	return pagination.NewPagedList(data, params.Page, params.Limit, count)
 }
 
-func (repo *todoRepository) GetById(ctx context.Context, id string) *model.Todo {
+func (repo *todoRepository) GetById(ctx context.Context, id string) *entity.Todo {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	res := repo.collection.FindOne(ctx, bson.M{"_id": _id})
 
-	// Decode above result to Todo object
-	data := &model.Todo{}
+	data := &entity.Todo{}
 	if err := res.Decode(data); err != nil {
 		panic(errs.BadRequestError(err))
 	}
@@ -68,8 +65,7 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) *model.Todo 
 	return data
 }
 
-func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) {
-	// Assign timestamps
+func (repo *todoRepository) Create(ctx context.Context, data *entity.Todo) {
 	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
 
 	result, err := repo.collection.InsertOne(ctx, data)
@@ -80,8 +76,7 @@ func (repo *todoRepository) Create(ctx context.Context, data *model.Todo) {
 	data.Id = result.InsertedID.(primitive.ObjectID)
 }
 
-func (repo *todoRepository) Update(ctx context.Context, data *model.Todo) {
-	// Assign timestamps
+func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
 	data.UpdatedAt = time.Now()
 
 	_, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})

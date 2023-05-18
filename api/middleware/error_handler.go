@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"example/common/errs"
-	"example/common/response"
+	"example/common/exchange"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 
 func errorHandler(ctx *gin.Context) {
 	if r := recover(); r != nil {
-		var statusCode int
+		statusCode := http.StatusInternalServerError
 		var err error
 
 		switch e := r.(type) {
@@ -20,15 +20,13 @@ func errorHandler(ctx *gin.Context) {
 			statusCode = e.StatusCode
 			err = e
 		case error:
-			statusCode = http.StatusInternalServerError
 			err = e
 		default:
-			statusCode = http.StatusInternalServerError
 			err = fmt.Errorf("%v", e)
 		}
 
 		log.Println(err)
-		response.Response(ctx, statusCode, nil, err)
+		exchange.ResponseError(ctx, statusCode, err)
 	}
 }
 

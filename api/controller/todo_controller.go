@@ -1,12 +1,11 @@
 package controller
 
 import (
-	"example/common/errs"
+	"example/common/exchange"
 	"example/common/pagination"
-	"example/common/response"
 	"example/db"
-	"example/form"
-	"example/usecase"
+	"example/service/request"
+	"example/service/usecase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,63 +31,53 @@ func NewTodoController(db *db.Database) TodoController {
 
 func (ctrl *todoController) GetPagedList() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Get paging params from query
 		params := pagination.GetPagingParams(ctx)
 
 		data := ctrl.usecase.GetPagedList(ctx, params)
 
-		response.Response(ctx, http.StatusOK, data, nil)
+		exchange.ResponseSuccess(ctx, http.StatusOK, data)
 	}
 }
 
 func (ctrl *todoController) GetById() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Get ID from param
 		id := ctx.Param("id")
 
 		data := ctrl.usecase.GetById(ctx, id)
 
-		response.Response(ctx, http.StatusOK, data, nil)
+		exchange.ResponseSuccess(ctx, http.StatusOK, data)
 	}
 }
 
 func (ctrl *todoController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Bind Todo form from body
-		var form form.TodoForm
-		if err := ctx.Bind(&form); err != nil {
-			panic(errs.BadRequestError(err))
-		}
+		var request request.TodoRequest
+		exchange.Bind(ctx, &request)
 
-		data := ctrl.usecase.Create(ctx, form)
+		data := ctrl.usecase.Create(ctx, request)
 
-		response.Response(ctx, http.StatusCreated, data, nil)
+		exchange.ResponseSuccess(ctx, http.StatusCreated, data)
 	}
 }
 
 func (ctrl *todoController) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Get ID from param
 		id := ctx.Param("id")
-		// Bind Todo form from body
-		var form form.TodoForm
-		if err := ctx.Bind(&form); err != nil {
-			panic(errs.BadRequestError(err))
-		}
+		var request request.TodoRequest
+		exchange.Bind(ctx, &request)
 
-		ctrl.usecase.Update(ctx, id, form)
+		ctrl.usecase.Update(ctx, id, request)
 
-		response.Response(ctx, http.StatusOK, "Success", nil)
+		exchange.ResponseSuccess(ctx, http.StatusOK, nil)
 	}
 }
 
 func (ctrl *todoController) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Get ID from param
 		id := ctx.Param("id")
 
 		ctrl.usecase.Delete(ctx, id)
 
-		response.Response(ctx, http.StatusOK, "Success", nil)
+		exchange.ResponseSuccess(ctx, http.StatusOK, nil)
 	}
 }

@@ -1,8 +1,8 @@
 package uow
 
 import (
+	"example/data/repository"
 	"example/db"
-	"example/repository"
 )
 
 type UnitOfWork interface {

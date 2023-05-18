@@ -9,8 +9,8 @@ import (
 )
 
 func Pagination(
-	coll *mongo.Collection,
 	ctx context.Context,
+	coll *mongo.Collection,
 	params PagingParams,
 	filter interface{},
 	opts ...*options.FindOptions,

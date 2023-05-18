@@ -18,7 +18,6 @@ func main() {
 	// Create log file
 	file := config.CreateLogFile()
 	router.Use(gin.LoggerWithWriter(file))
-	router.Use(middleware.JsonHeader())
 	router.Use(middleware.ErrorHandler())
 
 	db, err := db.ConnectDb()
@@ -34,7 +33,7 @@ func main() {
 	log.Println("Connect database successfully...")
 	log.Printf("Start server at http://localhost:%s", port)
 
-	if err := router.Run(":" + port); err != nil {
+	if err := router.Run("127.0.0.1:" + port); err != nil {
 		log.Fatalln(err)
 	}
 }
