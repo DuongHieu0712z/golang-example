@@ -13,12 +13,10 @@ import (
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 
-	router := gin.Default()
+	router := gin.New()
 
-	// Create log file
-	file := config.CreateLogFile()
-	router.Use(gin.LoggerWithWriter(file))
-	router.Use(middleware.ErrorHandler())
+	router.Use(gin.Logger())
+	router.Use(middleware.Recovery())
 
 	db, err := db.ConnectDb()
 	if err != nil {
@@ -33,7 +31,7 @@ func main() {
 	log.Println("Connect database successfully...")
 	log.Printf("Start server at http://localhost:%s", port)
 
-	if err := router.Run("127.0.0.1:" + port); err != nil {
+	if err := router.Run(":" + port); err != nil {
 		log.Fatalln(err)
 	}
 }

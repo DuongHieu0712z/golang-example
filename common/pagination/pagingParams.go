@@ -6,19 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Order string
-
 const (
-	ASC  Order = "asc"
-	DESC Order = "desc"
+	ASC  = "asc"
+	DESC = "desc"
 )
 
-// The paging parameters
 type PagingParams struct {
-	Page  int64  `json:"page"`  // The page number
-	Limit int64  `json:"limit"` // The limit documents per page
-	Field string `json:"field"` // The field to sort
-	Order int    `json:"order"` // The order sort (ASC: ascending, DESC: descending)
+	Page  int64  `json:"page"`
+	Limit int64  `json:"limit"`
+	Field string `json:"field"`
+	Order int    `json:"order"`
 }
 
 type PagingParamsOption func(*PagingParams)
@@ -40,37 +37,32 @@ func NewPagingParams(opts ...PagingParamsOption) *PagingParams {
 
 func WithPage(page int64) PagingParamsOption {
 	return func(pp *PagingParams) {
-		if page < 1 {
-			page = 1
+		if page > 1 {
+			pp.Page = page
 		}
-		pp.Page = page
 	}
 }
 
 func WithLimit(limit int64) PagingParamsOption {
 	return func(pp *PagingParams) {
-		if limit < 1 {
-			limit = 10
+		if limit > 1 {
+			pp.Limit = limit
 		}
-		pp.Limit = limit
 	}
 }
 
 func WithField(field string) PagingParamsOption {
 	return func(pp *PagingParams) {
-		if field == "" {
-			field = "_id"
+		if field != "" {
+			pp.Field = field
 		}
-		pp.Field = field
 	}
 }
 
-func WithOrder(order Order) PagingParamsOption {
+func WithOrder(order string) PagingParamsOption {
 	return func(pp *PagingParams) {
 		if order == DESC {
 			pp.Order = -1
-		} else {
-			pp.Order = 1
 		}
 	}
 }
@@ -85,6 +77,6 @@ func GetPagingParams(ctx *gin.Context) PagingParams {
 		WithPage(page),
 		WithLimit(limit),
 		WithField(field),
-		WithOrder(Order(order)),
+		WithOrder(order),
 	)
 }

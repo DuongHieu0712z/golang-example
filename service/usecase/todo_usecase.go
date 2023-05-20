@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"example/common/errs"
 	"example/common/pagination"
 	"example/data/entity"
 	"example/data/repository"
@@ -41,11 +40,11 @@ func (uc *todoUsecase) GetPagedList(
 ) *pagination.PagedList {
 	data := uc.todoRepo.GetPagedList(ctx, params)
 
-	var obj []response.TodoResponse
-	if err := mapper.MapperSlice(data.Data, &obj); err != nil {
-		panic(errs.BadRequestError(err))
+	var res []response.TodoResponse
+	if err := mapper.MapperSlice(data.Data, &res); err != nil {
+		panic(err)
 	}
-	data.Data = obj
+	data.Data = res
 
 	return data
 }
@@ -53,33 +52,33 @@ func (uc *todoUsecase) GetPagedList(
 func (uc *todoUsecase) GetById(ctx context.Context, id string) *response.TodoResponse {
 	data := uc.todoRepo.GetById(ctx, id)
 
-	obj := &response.TodoResponse{}
-	if err := mapper.Mapper(data, obj); err != nil {
-		panic(errs.BadRequestError(err))
+	res := &response.TodoResponse{}
+	if err := mapper.Mapper(data, res); err != nil {
+		panic(err)
 	}
-	return obj
+	return res
 }
 
 func (uc *todoUsecase) Create(ctx context.Context, request request.TodoRequest) *response.TodoResponse {
 	data := &entity.Todo{}
 	if err := mapper.Mapper(&request, data); err != nil {
-		panic(errs.BadRequestError(err))
+		panic(err)
 	}
 
 	uc.todoRepo.Create(ctx, data)
 
-	obj := &response.TodoResponse{}
-	if err := mapper.AutoMapper(data, obj); err != nil {
-		panic(errs.BadRequestError(err))
+	res := &response.TodoResponse{}
+	if err := mapper.Mapper(data, res); err != nil {
+		panic(err)
 	}
-	return obj
+	return res
 }
 
 func (uc *todoUsecase) Update(ctx context.Context, id string, request request.TodoRequest) {
 	data := uc.todoRepo.GetById(ctx, id)
 
 	if err := mapper.Mapper(&request, data); err != nil {
-		panic(errs.BadRequestError(err))
+		panic(err)
 	}
 
 	uc.todoRepo.Update(ctx, data)

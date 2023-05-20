@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"example/common/errs"
 	"example/common/pagination"
 	"example/data/entity"
@@ -79,8 +80,13 @@ func (repo *todoRepository) Create(ctx context.Context, data *entity.Todo) {
 func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
 	data.UpdatedAt = time.Now()
 
-	_, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
+	result, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
 	if err != nil {
+		panic(errs.BadRequestError(err))
+	}
+
+	if result.ModifiedCount < 1 {
+		err := errors.New("mongo: no document is updated")
 		panic(errs.BadRequestError(err))
 	}
 }
@@ -88,8 +94,13 @@ func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
 func (repo *todoRepository) Delete(ctx context.Context, id string) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
-	_, err := repo.collection.DeleteOne(ctx, bson.M{"_id": _id})
+	result, err := repo.collection.DeleteOne(ctx, bson.M{"_id": _id})
 	if err != nil {
+		panic(errs.BadRequestError(err))
+	}
+
+	if result.DeletedCount < 1 {
+		err := errors.New("mongo: no document is deleted")
 		panic(errs.BadRequestError(err))
 	}
 }

@@ -8,9 +8,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-errors/errors"
 )
 
-func errorHandler(ctx *gin.Context) {
+func errorHandler(ctx *gin.Context, logger *log.Logger) {
 	if r := recover(); r != nil {
 		statusCode := http.StatusInternalServerError
 		var err error
@@ -25,14 +26,20 @@ func errorHandler(ctx *gin.Context) {
 			err = fmt.Errorf("%v", e)
 		}
 
-		log.Println(err)
+		goErr := errors.Wrap(err, 2)
+		reset := "\033[0m"
+		logger.Printf("%v\n%s%s", err, goErr.Stack(), reset)
+
 		exchange.ResponseError(ctx, statusCode, err)
+		ctx.Abort()
 	}
 }
 
-func ErrorHandler() gin.HandlerFunc {
+func Recovery() gin.HandlerFunc {
+	logger := log.New(gin.DefaultErrorWriter, "\033[31m[ERROR] ", log.LstdFlags)
+
 	return func(ctx *gin.Context) {
-		defer errorHandler(ctx)
+		defer errorHandler(ctx, logger)
 		ctx.Next()
 	}
 }

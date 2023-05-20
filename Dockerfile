@@ -1,7 +1,7 @@
 ARG DIR=/src/app
 ARG APP=main
 
-FROM golang:1.17-alpine as builder
+FROM golang:1.20-alpine as builder
 ARG DIR
 ARG APP
 WORKDIR ${DIR}
