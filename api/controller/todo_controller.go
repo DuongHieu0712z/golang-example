@@ -6,13 +6,14 @@ import (
 	"example/db"
 	"example/service/request"
 	"example/service/usecase"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type TodoController interface {
-	GetPagedList() gin.HandlerFunc
+	GetPagination() gin.HandlerFunc
 	GetById() gin.HandlerFunc
 	Create() gin.HandlerFunc
 	Update() gin.HandlerFunc
@@ -29,11 +30,13 @@ func NewTodoController(db *db.Database) TodoController {
 	}
 }
 
-func (ctrl *todoController) GetPagedList() gin.HandlerFunc {
+func (ctrl *todoController) GetPagination() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		params := pagination.GetPagingParams(ctx)
+		var params pagination.PagingParams
+		exchange.BindQuery(ctx, &params)
+		log.Println(params)
 
-		data := ctrl.usecase.GetPagedList(ctx, params)
+		data := ctrl.usecase.GetPagination(ctx, params)
 
 		exchange.ResponseSuccess(ctx, http.StatusOK, data)
 	}
@@ -52,7 +55,7 @@ func (ctrl *todoController) GetById() gin.HandlerFunc {
 func (ctrl *todoController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request request.TodoRequest
-		exchange.Bind(ctx, &request)
+		exchange.BindBody(ctx, &request)
 
 		data := ctrl.usecase.Create(ctx, request)
 
@@ -64,7 +67,7 @@ func (ctrl *todoController) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 		var request request.TodoRequest
-		exchange.Bind(ctx, &request)
+		exchange.BindBody(ctx, &request)
 
 		ctrl.usecase.Update(ctx, id, request)
 

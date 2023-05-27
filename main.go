@@ -31,7 +31,7 @@ func main() {
 	log.Println("Connect database successfully...")
 	log.Printf("Start server at http://localhost:%s", port)
 
-	if err := router.Run(":" + port); err != nil {
+	if err := router.Run("localhost:" + port); err != nil {
 		log.Fatalln(err)
 	}
 }

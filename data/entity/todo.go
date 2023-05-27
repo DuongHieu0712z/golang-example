@@ -1,14 +1,9 @@
 package entity
 
-import (
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
+import "example/common/base"
 
 type Todo struct {
-	Id        primitive.ObjectID `bson:"_id,omitempty"`
-	Name      string             `bson:"name"`
-	CreatedAt time.Time          `bson:"createdAt"`
-	UpdatedAt time.Time          `bson:"updatedAt"`
+	base.Entity `bson:",inline"`
+
+	Name string `bson:"name"`
 }

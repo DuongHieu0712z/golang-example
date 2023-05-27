@@ -14,7 +14,7 @@ import (
 )
 
 type TodoUsecase interface {
-	GetPagedList(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
+	GetPagination(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
 	GetById(ctx context.Context, id string) *response.TodoResponse
 	Create(ctx context.Context, request request.TodoRequest) *response.TodoResponse
 	Update(ctx context.Context, id string, request request.TodoRequest)
@@ -34,17 +34,13 @@ func NewTodoUsecase(db *db.Database) TodoUsecase {
 	return usecase
 }
 
-func (uc *todoUsecase) GetPagedList(
+func (uc *todoUsecase) GetPagination(
 	ctx context.Context,
 	params pagination.PagingParams,
 ) *pagination.PagedList {
-	data := uc.todoRepo.GetPagedList(ctx, params)
+	data := uc.todoRepo.GetPagination(ctx, params)
 
-	var res []response.TodoResponse
-	if err := mapper.MapperSlice(data.Data, &res); err != nil {
-		panic(err)
-	}
-	data.Data = res
+	data.Data = response.ToTodoResponseSlice(data.Data.([]entity.Todo))
 
 	return data
 }
@@ -52,18 +48,15 @@ func (uc *todoUsecase) GetPagedList(
 func (uc *todoUsecase) GetById(ctx context.Context, id string) *response.TodoResponse {
 	data := uc.todoRepo.GetById(ctx, id)
 
-	res := &response.TodoResponse{}
-	if err := mapper.Mapper(data, res); err != nil {
-		panic(err)
-	}
-	return res
+	return response.ToTodoResponse(data)
 }
 
-func (uc *todoUsecase) Create(ctx context.Context, request request.TodoRequest) *response.TodoResponse {
+func (uc *todoUsecase) Create(
+	ctx context.Context,
+	request request.TodoRequest,
+) *response.TodoResponse {
 	data := &entity.Todo{}
-	if err := mapper.Mapper(&request, data); err != nil {
-		panic(err)
-	}
+	request.Map(data)
 
 	uc.todoRepo.Create(ctx, data)
 
@@ -76,10 +69,7 @@ func (uc *todoUsecase) Create(ctx context.Context, request request.TodoRequest) 
 
 func (uc *todoUsecase) Update(ctx context.Context, id string, request request.TodoRequest) {
 	data := uc.todoRepo.GetById(ctx, id)
-
-	if err := mapper.Mapper(&request, data); err != nil {
-		panic(err)
-	}
+	request.Map(data)
 
 	uc.todoRepo.Update(ctx, data)
 }

@@ -18,7 +18,12 @@ func Pagination(
 	opt := options.Find()
 	opt.SetSkip((params.Page - 1) * params.Limit)
 	opt.SetLimit(params.Limit)
-	opt.SetSort(bson.D{{Key: params.Field, Value: params.Order}})
+
+	order := 1
+	if params.Order == "desc" {
+		order = -1
+	}
+	opt.SetSort(bson.D{{Key: params.Field, Value: order}})
 
 	opts = append(opts, opt)
 

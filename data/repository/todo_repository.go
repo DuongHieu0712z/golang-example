@@ -3,19 +3,18 @@ package repository
 import (
 	"context"
 	"errors"
+	"example/common/base"
 	"example/common/errs"
 	"example/common/pagination"
 	"example/data/entity"
 	"example/db"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TodoRepository interface {
-	GetPagedList(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
+	GetPagination(ctx context.Context, params pagination.PagingParams) *pagination.PagedList
 	GetById(ctx context.Context, id string) *entity.Todo
 	Create(ctx context.Context, data *entity.Todo)
 	Update(ctx context.Context, data *entity.Todo)
@@ -23,25 +22,20 @@ type TodoRepository interface {
 }
 
 type todoRepository struct {
-	name       string
-	db         *db.Database
-	collection *mongo.Collection
+	base.Repository
 }
 
 func NewTodoRepository(db *db.Database) TodoRepository {
-	repo := &todoRepository{
-		name: "todo",
-		db:   db,
+	return &todoRepository{
+		Repository: *base.NewRepository(db, "todo"),
 	}
-	repo.collection = db.GetCollection(repo.name)
-	return repo
 }
 
-func (repo *todoRepository) GetPagedList(
+func (repo *todoRepository) GetPagination(
 	ctx context.Context,
 	params pagination.PagingParams,
 ) *pagination.PagedList {
-	cur, count, err := pagination.Pagination(ctx, repo.collection, params, bson.M{})
+	cur, count, err := pagination.Pagination(ctx, repo.Collection, params, bson.M{})
 	if err != nil {
 		panic(errs.BadRequestError(err))
 	}
@@ -56,10 +50,10 @@ func (repo *todoRepository) GetPagedList(
 
 func (repo *todoRepository) GetById(ctx context.Context, id string) *entity.Todo {
 	_id, _ := primitive.ObjectIDFromHex(id)
-	res := repo.collection.FindOne(ctx, bson.M{"_id": _id})
+	cur := repo.Collection.FindOne(ctx, bson.M{"_id": _id})
 
-	data := &entity.Todo{}
-	if err := res.Decode(data); err != nil {
+	data := &entity.Todo{Entity: base.Entity{}}
+	if err := cur.Decode(data); err != nil {
 		panic(errs.BadRequestError(err))
 	}
 
@@ -67,25 +61,25 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) *entity.Todo
 }
 
 func (repo *todoRepository) Create(ctx context.Context, data *entity.Todo) {
-	data.CreatedAt, data.UpdatedAt = time.Now(), time.Now()
+	data.SetTime(true)
 
-	result, err := repo.collection.InsertOne(ctx, data)
+	result, err := repo.Collection.InsertOne(ctx, data)
 	if err != nil {
 		panic(errs.BadRequestError(err))
 	}
 
-	data.Id = result.InsertedID.(primitive.ObjectID)
+	data.SetId(result.InsertedID)
 }
 
 func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
-	data.UpdatedAt = time.Now()
+	data.SetTime(false)
 
-	result, err := repo.collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
+	result, err := repo.Collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
 	if err != nil {
 		panic(errs.BadRequestError(err))
 	}
 
-	if result.ModifiedCount < 1 {
+	if result.MatchedCount < 1 {
 		err := errors.New("mongo: no document is updated")
 		panic(errs.BadRequestError(err))
 	}
@@ -94,7 +88,7 @@ func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
 func (repo *todoRepository) Delete(ctx context.Context, id string) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
-	result, err := repo.collection.DeleteOne(ctx, bson.M{"_id": _id})
+	result, err := repo.Collection.DeleteOne(ctx, bson.M{"_id": _id})
 	if err != nil {
 		panic(errs.BadRequestError(err))
 	}
