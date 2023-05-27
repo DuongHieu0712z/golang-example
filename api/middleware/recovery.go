@@ -11,22 +11,20 @@ import (
 	"github.com/go-errors/errors"
 )
 
+func Recovery() gin.HandlerFunc {
+	logger := log.New(gin.DefaultErrorWriter, "\033[31m[ERROR] ", log.LstdFlags)
+
+	return func(ctx *gin.Context) {
+		defer errorHandler(ctx, logger)
+		ctx.Next()
+	}
+}
+
 func errorHandler(ctx *gin.Context, logger *log.Logger) {
 	if r := recover(); r != nil {
-		statusCode := http.StatusInternalServerError
-		var err error
+		err, statusCode := getError(r)
 
-		switch e := r.(type) {
-		case errs.HttpError:
-			statusCode = e.StatusCode
-			err = e
-		case error:
-			err = e
-		default:
-			err = fmt.Errorf("%v", e)
-		}
-
-		goErr := errors.Wrap(err, 2)
+		goErr := errors.Wrap(err, 0)
 		reset := "\033[0m"
 		logger.Printf("%v\n%s%s", err, goErr.Stack(), reset)
 
@@ -35,11 +33,19 @@ func errorHandler(ctx *gin.Context, logger *log.Logger) {
 	}
 }
 
-func Recovery() gin.HandlerFunc {
-	logger := log.New(gin.DefaultErrorWriter, "\033[31m[ERROR] ", log.LstdFlags)
+func getError(r interface{}) (error, int) {
+	statusCode := http.StatusInternalServerError
+	var err error
 
-	return func(ctx *gin.Context) {
-		defer errorHandler(ctx, logger)
-		ctx.Next()
+	switch e := r.(type) {
+	case errs.HttpError:
+		statusCode = e.StatusCode
+		err = e
+	case error:
+		err = e
+	default:
+		err = fmt.Errorf("%v", e)
 	}
+
+	return err, statusCode
 }

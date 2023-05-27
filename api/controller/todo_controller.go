@@ -6,7 +6,6 @@ import (
 	"example/db"
 	"example/service/request"
 	"example/service/usecase"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,52 +29,51 @@ func NewTodoController(db *db.Database) TodoController {
 	}
 }
 
-func (ctrl *todoController) GetPagination() gin.HandlerFunc {
+func (ctrl todoController) GetPagination() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var params pagination.PagingParams
 		exchange.BindQuery(ctx, &params)
-		log.Println(params)
 
-		data := ctrl.usecase.GetPagination(ctx, params)
+		resp := ctrl.usecase.GetPagination(ctx, params)
 
-		exchange.ResponseSuccess(ctx, http.StatusOK, data)
+		exchange.ResponseSuccess(ctx, http.StatusOK, resp)
 	}
 }
 
-func (ctrl *todoController) GetById() gin.HandlerFunc {
+func (ctrl todoController) GetById() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
-		data := ctrl.usecase.GetById(ctx, id)
+		resp := ctrl.usecase.GetById(ctx, id)
 
-		exchange.ResponseSuccess(ctx, http.StatusOK, data)
+		exchange.ResponseSuccess(ctx, http.StatusOK, resp)
 	}
 }
 
-func (ctrl *todoController) Create() gin.HandlerFunc {
+func (ctrl todoController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var request request.TodoRequest
-		exchange.BindBody(ctx, &request)
+		var req request.TodoRequest
+		exchange.BindBody(ctx, &req)
 
-		data := ctrl.usecase.Create(ctx, request)
+		resp := ctrl.usecase.Create(ctx, req)
 
-		exchange.ResponseSuccess(ctx, http.StatusCreated, data)
+		exchange.ResponseSuccess(ctx, http.StatusCreated, resp)
 	}
 }
 
-func (ctrl *todoController) Update() gin.HandlerFunc {
+func (ctrl todoController) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		var request request.TodoRequest
-		exchange.BindBody(ctx, &request)
+		var req request.TodoRequest
+		exchange.BindBody(ctx, &req)
 
-		ctrl.usecase.Update(ctx, id, request)
+		ctrl.usecase.Update(ctx, id, req)
 
 		exchange.ResponseSuccess(ctx, http.StatusOK, nil)
 	}
 }
 
-func (ctrl *todoController) Delete() gin.HandlerFunc {
+func (ctrl todoController) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 

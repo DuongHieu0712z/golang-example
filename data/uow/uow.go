@@ -7,6 +7,7 @@ import (
 
 type UnitOfWork interface {
 	Todos() repository.TodoRepository
+	Users() repository.UserRepository
 }
 
 type unitOfWork struct {
@@ -19,4 +20,8 @@ func NewUnitOfWork(db *db.Database) UnitOfWork {
 
 func (uow *unitOfWork) Todos() repository.TodoRepository {
 	return repository.NewTodoRepository(uow.db)
+}
+
+func (uow *unitOfWork) Users() repository.UserRepository {
+	return repository.NewUserRepository(uow.db)
 }

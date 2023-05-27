@@ -31,7 +31,7 @@ func NewTodoRepository(db *db.Database) TodoRepository {
 	}
 }
 
-func (repo *todoRepository) GetPagination(
+func (repo todoRepository) GetPagination(
 	ctx context.Context,
 	params pagination.PagingParams,
 ) *pagination.PagedList {
@@ -48,7 +48,7 @@ func (repo *todoRepository) GetPagination(
 	return pagination.NewPagedList(data, params.Page, params.Limit, count)
 }
 
-func (repo *todoRepository) GetById(ctx context.Context, id string) *entity.Todo {
+func (repo todoRepository) GetById(ctx context.Context, id string) *entity.Todo {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	cur := repo.Collection.FindOne(ctx, bson.M{"_id": _id})
 
@@ -60,7 +60,7 @@ func (repo *todoRepository) GetById(ctx context.Context, id string) *entity.Todo
 	return data
 }
 
-func (repo *todoRepository) Create(ctx context.Context, data *entity.Todo) {
+func (repo todoRepository) Create(ctx context.Context, data *entity.Todo) {
 	data.SetTime(true)
 
 	result, err := repo.Collection.InsertOne(ctx, data)
@@ -71,7 +71,7 @@ func (repo *todoRepository) Create(ctx context.Context, data *entity.Todo) {
 	data.SetId(result.InsertedID)
 }
 
-func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
+func (repo todoRepository) Update(ctx context.Context, data *entity.Todo) {
 	data.SetTime(false)
 
 	result, err := repo.Collection.UpdateByID(ctx, data.Id, bson.M{"$set": data})
@@ -85,7 +85,7 @@ func (repo *todoRepository) Update(ctx context.Context, data *entity.Todo) {
 	}
 }
 
-func (repo *todoRepository) Delete(ctx context.Context, id string) {
+func (repo todoRepository) Delete(ctx context.Context, id string) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	result, err := repo.Collection.DeleteOne(ctx, bson.M{"_id": _id})

@@ -15,7 +15,7 @@ type TodoResponse struct {
 
 func ToTodoResponse(data *entity.Todo) *TodoResponse {
 	if data == nil {
-		panic("data is null")
+		panic("todo is null")
 	}
 
 	return &TodoResponse{

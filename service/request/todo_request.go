@@ -6,9 +6,9 @@ type TodoRequest struct {
 	Name string `json:"name" form:"name" binding:"required"`
 }
 
-func (req *TodoRequest) Map(data *entity.Todo) {
+func (req TodoRequest) Map(data *entity.Todo) {
 	if data == nil {
-		panic("data is null")
+		panic("todo request is null")
 	}
 
 	data.Name = req.Name

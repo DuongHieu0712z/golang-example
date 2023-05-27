@@ -27,7 +27,7 @@ func NewUserRepository(db *db.Database) UserRepository {
 	}
 }
 
-func (repo *userRepository) GetById(ctx context.Context, id string) *entity.User {
+func (repo userRepository) GetById(ctx context.Context, id string) *entity.User {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	cur := repo.Collection.FindOne(ctx, bson.M{"_id": _id})
 
@@ -39,7 +39,7 @@ func (repo *userRepository) GetById(ctx context.Context, id string) *entity.User
 	return data
 }
 
-func (repo *userRepository) GetByUsername(ctx context.Context, username string) *entity.User {
+func (repo userRepository) GetByUsername(ctx context.Context, username string) *entity.User {
 	cur := repo.Collection.FindOne(ctx, bson.M{"username": username})
 
 	data := &entity.User{}
@@ -50,7 +50,7 @@ func (repo *userRepository) GetByUsername(ctx context.Context, username string) 
 	return data
 }
 
-func (repo *userRepository) Create(ctx context.Context, data *entity.User) {
+func (repo userRepository) Create(ctx context.Context, data *entity.User) {
 	data.SetTime(true)
 
 	result, err := repo.Collection.InsertOne(ctx, data)
