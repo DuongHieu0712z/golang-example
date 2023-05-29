@@ -11,7 +11,6 @@ require (
 
 require (
 	github.com/bytedance/sonic v1.8.7 // indirect
-	github.com/devfeel/mapper v0.7.13
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.16.4 // indirect
@@ -25,7 +24,7 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.8.0 // indirect
+	golang.org/x/crypto v0.8.0
 	google.golang.org/protobuf v1.30.0 // indirect
 )
 
